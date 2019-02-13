@@ -5,3 +5,4 @@ dynamic
 node_modules
 env.sh
 tmp
+*.tgz
