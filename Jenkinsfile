@@ -12,7 +12,7 @@ node('docker') {
 
     stage('Build and Publish') {
         withCredentials([
-            usernamePassword(credentialsId: 'npmjs_wicked', usernameVariable: 'NPM_USER', passwordVariable: 'NPM_PASSWORD')
+            usernamePassword(credentialsId: 'npmjs_wicked', usernameVariable: 'NPM_USER', passwordVariable: 'NPM_PASSWORD'),
             string(credentialsId: 'npmjs_wicked_email', variable: 'NPM_EMAIL')
         ]) {
 
