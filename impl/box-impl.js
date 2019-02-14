@@ -12,7 +12,7 @@ const box = {};
 const BOX_CONTAINER_NAME = 'wicked-box';
 const BOX_IMAGE_NAME = 'haufelexware/wicked.box';
 
-box.start = async (tag, pull, dir, nodeEnv, uiPort, gatewayPort, adminPort, logLevel, dockerHost, callback) => {
+box.start = async (tag, pull, dir, nodeEnv, uiPort, apiPort, gatewayPort, adminPort, logLevel, dockerHost, callback) => {
     const currentDir = process.cwd();
     let configDir = dir;
     if (!path.isAbsolute(configDir))
@@ -45,8 +45,7 @@ box.start = async (tag, pull, dir, nodeEnv, uiPort, gatewayPort, adminPort, logL
         HostConfig: {
             PortBindings: {
                 '3000/tcp': [{ 'HostPort': uiPort.toString() }],
-                '8000/tcp': [{ 'HostPort': gatewayPort.toString() }],
-                '8001/tcp': [{ 'HostPort': adminPort.toString() }]
+                '8000/tcp': [{ 'HostPort': gatewayPort.toString() }]
             },
             AutoRemove: true,
             Binds: [
@@ -54,6 +53,15 @@ box.start = async (tag, pull, dir, nodeEnv, uiPort, gatewayPort, adminPort, logL
             ]
         }
     };
+
+    if (adminPort) {
+        console.log(`Exposing the Kong Admin API on http://localhost:${adminPort}`);
+        createOptions.HostConfig.PortBindings['8001/tcp'] = [{ HostPort: adminPort.toString() }];
+    }
+    if (apiPort) {
+        console.log(`Exposing the wicked API on http://localhost:${apiPort}`);
+        createOptions.HostConfig.PortBindings['3001/tcp'] = [{ HostPort: apiPort.toString() }];
+    }
 
     try {
         if (pull) {
