@@ -86,7 +86,7 @@ implUtils.checkForLatest = async () => {
             console.error(`You are currently using:          ${utils.getVersion()}`);
             console.error();
             console.error('Update with:');
-            console.error('  npm install -g wicked-cli');
+            console.error('  npm upgrade -g wicked-cli');
             console.error();
         }
     }
