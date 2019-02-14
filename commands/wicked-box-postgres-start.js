@@ -16,8 +16,11 @@ program
     .action(() => {
         didAction = true;
         postgres.start(program.tag, program.pull, program.port, program.volume, (err) => {
-            if (err)
+            if (err) {
                 console.error(err);
+                process.exit(1);
+            }
+            process.exit(0);
         });
     })
     .parse(process.argv);

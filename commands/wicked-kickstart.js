@@ -22,8 +22,9 @@ program
         kickstart.run(tag, program.pull, directory, program.new, (err) => {
             if (err) {
                 console.error(err);
-                return;
+                process.exit(1);
             }
+            process.exit(0);
         });
     })
     .parse(process.argv);

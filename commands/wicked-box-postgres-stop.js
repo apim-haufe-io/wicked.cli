@@ -12,8 +12,11 @@ program
     .action(() => {
         didAction = true;
         postgres.stop((err) => {
-            if (err)
+            if (err) {
                 console.error(err);
+                process.exit(1);
+            }
+            process.exit(0);
         });
     })
     .parse(process.argv);

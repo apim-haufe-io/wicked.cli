@@ -70,6 +70,7 @@ box.start = async (tag, pull, dir, nodeEnv, uiPort, gatewayPort, adminPort, logL
         console.log();
         console.log('Stop the wicked in a box container with the following command:');
         console.log(`  wicked box stop`);
+        return callback(null);
     } catch (err) {
         console.error(err.message);
         console.error('*** Could not start wicked-in-a-box.');

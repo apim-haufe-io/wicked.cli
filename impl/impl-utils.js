@@ -26,16 +26,45 @@ implUtils.pull = async (imageName) => {
                 return reject(err);
             docker.modem.followProgress(stream, onFinished, onProgress);
 
+            const layerMap = {};
+
             function onFinished(err, output) {
-                if (err)
+                if (err) {
                     return reject(err);
-                // console.log(output);
-                for (let s of output)
-                    console.log(s.status);
+                }
+
+                let layerCount = 0;
+                for (let l in layerMap)
+                    layerCount++;
+                process.stderr.write(`\rFinished pull of ${layerCount} layers.                                                                            `);
+                console.error();
+                console.error('Pull finished.');
                 resolve();
             }
+
+
             function onProgress(event) {
-                // console.log(event);
+                if (!event.id)
+                    return;
+                // Non-layer event "Pulling from ..."
+                if (event.status && event.status.toLowerCase().indexOf('pulling') >= 0)
+                    return;
+                layerMap[event.id] = event;
+                let totalBytes = 0;
+                let currentBytes = 0;
+                let layerCount = 0;
+                let layerFinished = 0;
+                for (let l in layerMap) {
+                    layerCount++;
+                    const layer = layerMap[l];
+                    if (layer.progressDetail && layer.progressDetail.total) {
+                        totalBytes += layer.progressDetail.total;
+                        currentBytes += layer.progressDetail.current;
+                    } else if (layer.status && layer.status.toLowerCase().indexOf('pull complete') >= 0) {
+                        layerFinished++;
+                    }
+                }
+                process.stderr.write(`\rPulling ${layerCount} layers, ${layerFinished} finished (${currentBytes} / ${totalBytes} bytes).                   `);
             }
         });
     });

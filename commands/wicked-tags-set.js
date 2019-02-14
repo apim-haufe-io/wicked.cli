@@ -13,8 +13,11 @@ program
     .action((tag) => {
         didAction = true;
         tags.setCurrentTag(tag, program.force, (err) => {
-            if (err)
+            if (err) {
                 console.error(err);
+                process.exit(1);
+            }
+            process.exit(0);
         });
     })
     .parse(process.argv);

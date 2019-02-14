@@ -76,9 +76,9 @@ postgres.stop = async (callback) => {
     }
     try {
         const pgContainer = await docker.getContainer(pgContainerInfo.Id);
-        // console.log(pgContainer);
         await pgContainer.stop();
         console.log('Postgres was stopped.');
+        return callback(null);
     } catch (err) {
         return callback(err);
     }

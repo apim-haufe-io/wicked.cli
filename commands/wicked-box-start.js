@@ -22,8 +22,11 @@ program
         didAction = true;
         // console.log('box start!');
         box.start(program.tag, program.pull, configDir, program.nodeEnv, program.uiPort, program.gatewayPort, program.adminPort, program.logLevel, program.dockerHost, (err) => {
-            if (err)
+            if (err) {
                 console.error(err);
+                process.exit(1);
+            }
+            process.exit(0);
         });
     })
     .parse(process.argv);

@@ -10,6 +10,8 @@ const Docker = require('dockerode');
 // Default settings
 const docker = new Docker();
 
+const KICKSTARTER_CONTAINER = 'wicked-kickstarter';
+
 kickstart.run = async (tag, pull, dir, newFlag, callback) => {
     const currentDir = process.cwd();
     let configDir = dir;
@@ -19,7 +21,7 @@ kickstart.run = async (tag, pull, dir, newFlag, callback) => {
     console.log(`Running Kickstarter '${tag}' on '${configDir}' (mapped to /var/portal-api)...`);
 
     const createOptions = {
-        name: 'wicked-kickstarter',
+        name: KICKSTARTER_CONTAINER,
         Tty: true,
         ExposedPorts: { '3333/tcp': {} },
         HostConfig: {
@@ -53,7 +55,38 @@ kickstart.run = async (tag, pull, dir, newFlag, callback) => {
     docker.run(kickstarterImage, cmd, process.stdout, createOptions, (err, data, container) => {
         if (err)
             console.error(err);
-        console.log(JSON.stringify(data));
+        return callback(null);
+    });
+
+    if (process.platform === "win32") {
+        const rl = require('readline').createInterface({
+            input: process.stdin,
+            output: process.stdout
+        });
+
+        rl.on('SIGINT', function () {
+            process.emit("SIGINT");
+        });
+    }
+
+    let processingSigint = false;
+    process.on('SIGINT', function () {
+        if (processingSigint)
+            return;
+        processingSigint = true;
+        console.error('*** Received SIGINT (Ctrl-C), attempting to shut down Kickstarter...');
+        (async () => {
+            try {
+                const containerInfo = await implUtils.getContainerByName(KICKSTARTER_CONTAINER);
+                const container = await docker.getContainer(containerInfo.Id);
+                await container.stop();
+                console.error('Kickstarter stopped.');
+            } catch (err) {
+                console.error(err);
+                console.error('*** An error occurred while stopping the Kickstarter container.');
+                process.exit(1);
+            }
+        })();
     });
 };
 
