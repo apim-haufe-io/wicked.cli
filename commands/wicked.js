@@ -15,6 +15,7 @@ const implUtils = require('../impl/impl-utils');
         .command('tags <command>', 'tag commands')
         .command('kickstart [options]', 'invoke the wicked kickstarter')
         .command('box <command>', 'manage a local wicked-in-a-box')
+        .command('postgres <command>', 'manage a local Postgres container')
         .on('command:*', function (command) {
             const firstCommand = command[0];
             if (!this.commands.find(c => c._name == firstCommand)) {

@@ -105,6 +105,16 @@ box.stop = async (callback) => {
     }
 };
 
+box.status = async (callback) => {
+    const boxContainerInfo = await box.getBoxContainer();
+    if (!boxContainerInfo) {
+        console.log(`Container ${BOX_CONTAINER_NAME} is NOT running.`);
+        process.exit(1);
+    }
+    console.log(`Container ${BOX_CONTAINER_NAME} is running.`);
+    process.exit(0);
+};
+
 box.getBoxContainer = async () => {
     return implUtils.getContainerByName(BOX_CONTAINER_NAME);
 };

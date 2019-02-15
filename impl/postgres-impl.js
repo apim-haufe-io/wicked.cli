@@ -8,7 +8,7 @@ const implUtils = require('./impl-utils');
 
 const postgres = {};
 
-const PG_CONTAINER_NAME = 'wicked-box-postgres';
+const PG_CONTAINER_NAME = 'wicked-postgres';
 
 postgres.start = async (tag, pull, pgPort, dataDir, callback) => {
     const pgContainer = await postgres.getPgContainer();
@@ -71,7 +71,7 @@ postgres.start = async (tag, pull, pgPort, dataDir, callback) => {
 postgres.stop = async (callback) => {
     const pgContainerInfo = await postgres.getPgContainer();
     if (!pgContainerInfo) {
-        console.log(`Container '${PG_CONTAINER_NAME} is not running, cannot stop.`);
+        console.log(`Container '${PG_CONTAINER_NAME}' is not running, cannot stop.`);
         return callback(null);
     }
     try {
@@ -82,6 +82,16 @@ postgres.stop = async (callback) => {
     } catch (err) {
         return callback(err);
     }
+};
+
+postgres.status = async (callback) => {
+    const pgContainerInfo = await postgres.getPgContainer();
+    if (!pgContainerInfo) {
+        console.error(`Container '${PG_CONTAINER_NAME}' is NOT running.`);
+        process.exit(1);
+    }
+    console.error(`Container '${PG_CONTAINER_NAME}' is running.`);
+    process.exit(0);
 };
 
 postgres.getPgContainer = async () => {
