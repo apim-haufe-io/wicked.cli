@@ -58,7 +58,7 @@ postgres.start = async (tag, pull, pgPort, dataDir, callback) => {
         await container.start({});
         console.log(`Postgres ${tag} is running.`);
         console.log('To stop Postgres, use one of the following commands:');
-        console.log('  wicked box postgres stop');
+        console.log('  wicked postgres stop');
         console.log(`  docker rm -f ${PG_CONTAINER_NAME}`);
         callback(null);
     } catch (err) {

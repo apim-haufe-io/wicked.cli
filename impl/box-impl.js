@@ -21,7 +21,7 @@ box.start = async (tag, pull, dir, nodeEnv, uiPort, apiPort, gatewayPort, adminP
     const pgContainer = await postgres.getPgContainer();
     if (!pgContainer) {
         console.error('*** Postgres is not running, cannot start "wicked-in-a-box".');
-        console.error('*** Start a Postgres instance using "wicked box postgres start".');
+        console.error('*** Start a Postgres instance using "wicked postgres start".');
         process.exit(1);
     }
 
