@@ -3,6 +3,7 @@
 const Docker = require('dockerode');
 const docker = new Docker();
 const axios = require('axios');
+const os = require('os');
 
 const utils = require('../commands/utils');
 const settings = require('./settings');
@@ -91,6 +92,33 @@ implUtils.checkForLatest = async () => {
         }
     }
     return;
+};
+
+implUtils.getDefaultLocalIP = () => {
+    let localIPs = getLocalIPs();
+    if (localIPs.length > 0)
+        return localIPs[0];
+    throw new Error('No valid local IPv4 addresses found.');
+};
+
+function getLocalIPs() {
+    console.error('Finding local IP addresses...');
+    const interfaces = os.networkInterfaces();
+    const addresses = [];
+    for (let k in interfaces) {
+        for (let k2 in interfaces[k]) {
+            const address = interfaces[k][k2];
+            if (address.family === 'IPv4' && !address.internal) {
+                addresses.push(address.address);
+            }
+        }
+    }
+    console.error(addresses);
+    return addresses;
+}
+
+implUtils.isLinux = () => {
+    return os.platform().toLowerCase() === 'linux';
 };
 
 module.exports = implUtils;

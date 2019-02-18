@@ -12,7 +12,7 @@ const box = {};
 const BOX_CONTAINER_NAME = 'wicked-box';
 const BOX_IMAGE_NAME = 'haufelexware/wicked.box';
 
-box.start = async (tag, pull, dir, nodeEnv, uiPort, apiPort, gatewayPort, adminPort, logLevel, dockerHost, callback) => {
+box.start = async (tag, pull, dir, nodeEnv, uiPort, apiPort, gatewayPort, adminPort, logLevel, defaultDockerHost, callback) => {
     const currentDir = process.cwd();
     let configDir = dir;
     if (!path.isAbsolute(configDir))
@@ -24,6 +24,20 @@ box.start = async (tag, pull, dir, nodeEnv, uiPort, apiPort, gatewayPort, adminP
         console.error('*** Start a Postgres instance using "wicked box postgres start".');
         process.exit(1);
     }
+
+    let dockerHost = defaultDockerHost;
+    if (implUtils.isLinux() && defaultDockerHost === 'host.docker.internal') {
+        console.log('Linux detected: Attempting to resolve local machine\'s IP address...');
+        try {
+            const localIP = implUtils.getDefaultLocalIP();
+            dockerHost = localIP;
+            console.log(`Auto-setting --docker-host to ${localIP}.`);
+        } catch (err) {
+            console.error(err.message);
+            console.error('WARNING: Could not resolve local IP address. Please pass in via the --docker-host option.');
+        }
+    }
+
     const pgPort = pgContainer.Ports[0].PublicPort;
     console.log(`Will use Postgres on port ${pgPort}.`);
     const imageName = `haufelexware/wicked.box:${tag}`;

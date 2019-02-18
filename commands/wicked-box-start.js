@@ -17,7 +17,7 @@ program
     .option('-w, --api-port <api-port>', 'port to expose wicked\'s API port on (defaults to off)')
     .option('-e, --node-env <node-env>', 'the NODE_ENV (wicked environment) to use', 'box')
     .option('-l, --log-level <log-level>', 'log level to use in the wicked components (debug, info, warn, error)', 'info')
-    .option('--docker-host <docker-host>', 'DNS name or IP address of the docker host (use on Linux)', 'host.docker.internal')
+    .option('--docker-host <docker-host>', 'DNS name or IP address of the docker host', 'host.docker.internal')
     .option('--no-pull', 'do not attempt to pull the image')
     .action((configDir) => {
         didAction = true;

@@ -1,6 +1,7 @@
 'use strict';
 
 const path = require('path');
+const os = require('os');
 const implUtils = require('./impl-utils');
 
 const kickstart = {};
@@ -12,7 +13,7 @@ const docker = new Docker();
 
 const KICKSTARTER_CONTAINER = 'wicked-kickstarter';
 
-kickstart.run = async (tag, pull, dir, newFlag, callback) => {
+kickstart.run = async (tag, pull, dir, newFlag, logLevel, callback) => {
     const currentDir = process.cwd();
     let configDir = dir;
     if (!path.isAbsolute(configDir))
@@ -30,12 +31,28 @@ kickstart.run = async (tag, pull, dir, newFlag, callback) => {
             Binds: [
                 `${configDir}:/var/portal-api`
             ]
-        }
+        },
+        Env: [
+            `LOG_LEVEL=${logLevel}`
+        ]
     };
 
     const cmd = [];
     if (newFlag)
         cmd.push('--new');
+
+    if (implUtils.isLinux()) {
+        // We need to set the UID and GID into the Kickstarter container so that
+        // the files are persisted with the correct user and group IDs; otherwise
+        // the configuration files are written as the root user, which can lead
+        // to various problems.
+        const userInfo = os.userInfo();
+        const envs = createOptions.Env;
+        envs.push(`LOCAL_UID=${userInfo.uid}`);
+        envs.push(`LOCAL_GID=${userInfo.gid}`);
+
+        console.log(`Detected Linux; using UID ${userInfo.uid} and GID ${userInfo.gid} inside the Kickstarter container.`);
+    }
 
     const kickstarterImage = `haufelexware/wicked.kickstarter:${tag}-alpine`;
     console.log(`Using image ${kickstarterImage}...`);
