@@ -1,6 +1,6 @@
 {
   "name": "wicked-cli",
-  "version": "1.0.0-rc.2-beta.1",
+  "version": "1.0.0-rc.2-beta.2",
   "description": "wicked.haufe.io Command Line Tool",
   "main": "commands/wicked.js",
   "scripts": {
@@ -27,6 +27,7 @@
   "dependencies": {
     "axios": "0.18.0",
     "commander": "2.19.0",
-    "dockerode": "2.5.8"
+    "dockerode": "2.5.8",
+    "opn": "5.4.0"
   }
 }

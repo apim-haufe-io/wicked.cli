@@ -19,10 +19,12 @@ program
     .option('-l, --log-level <log-level>', 'log level to use in the wicked components (debug, info, warn, error)', 'info')
     .option('--docker-host <docker-host>', 'DNS name or IP address of the docker host', 'host.docker.internal')
     .option('--no-pull', 'do not attempt to pull the image')
+    .option('--no-wait', 'do not wait (up 60 seconds) until environment has started')
+    .option('--no-open', 'do not open the browser with the portal after it has finished; implied by --no-wait')
     .action((configDir) => {
         didAction = true;
         // console.log('box start!');
-        box.start(program.tag, program.pull, configDir, program.nodeEnv, program.uiPort, program.apiPort, program.gatewayPort, program.adminPort, program.logLevel, program.dockerHost, (err) => {
+        box.start(program.tag, program.pull, configDir, program.nodeEnv, program.uiPort, program.apiPort, program.gatewayPort, program.adminPort, program.logLevel, program.dockerHost, program.wait, program.open, (err) => {
             if (err) {
                 console.error(err);
                 process.exit(1);

@@ -2,6 +2,8 @@
 
 const Docker = require('dockerode');
 const docker = new Docker();
+const axios = require('axios');
+const opn = require('opn');
 const path = require('path');
 
 const postgres = require('./postgres-impl');
@@ -12,7 +14,7 @@ const box = {};
 const BOX_CONTAINER_NAME = 'wicked-box';
 const BOX_IMAGE_NAME = 'haufelexware/wicked.box';
 
-box.start = async (tag, pull, dir, nodeEnv, uiPort, apiPort, gatewayPort, adminPort, logLevel, defaultDockerHost, callback) => {
+box.start = async (tag, pull, dir, nodeEnv, uiPort, apiPort, gatewayPort, adminPort, logLevel, defaultDockerHost, wait, open, callback) => {
     const currentDir = process.cwd();
     let configDir = dir;
     if (!path.isAbsolute(configDir))
@@ -38,7 +40,13 @@ box.start = async (tag, pull, dir, nodeEnv, uiPort, apiPort, gatewayPort, adminP
         }
     }
 
-    const pgPort = pgContainer.Ports[0].PublicPort;
+    const publicPort = pgContainer.Ports.find(p => p.hasOwnProperty('PublicPort'));
+    if (!publicPort) {
+        console.error('*** Postgres does not have a PublicPort Ports entry.');
+        process.exit(1);
+    }
+    const pgPort = publicPort.PublicPort;
+
     console.log(`Will use Postgres on port ${pgPort}.`);
     const imageName = `haufelexware/wicked.box:${tag}`;
     const createOptions = {
@@ -52,6 +60,8 @@ box.start = async (tag, pull, dir, nodeEnv, uiPort, apiPort, gatewayPort, adminP
             'KONG_PG_USER=kong',
             'KONG_PG_PASSWORD=kong',
             `KONG_PG_HOST=${dockerHost}`,
+            `KONG_PG_PORT=${pgPort}`,
+            `PORTAL_STORAGE_PGPORT=${pgPort}`,
             `DOCKER_HOST=${dockerHost}`,
             `PORTAL_NETWORK_APIHOST=localhost:${gatewayPort}`,
             `PORTAL_NETWORK_PORTALHOST=localhost:${uiPort}`
@@ -75,6 +85,8 @@ box.start = async (tag, pull, dir, nodeEnv, uiPort, apiPort, gatewayPort, adminP
     if (apiPort) {
         console.log(`Exposing the wicked API on http://localhost:${apiPort}`);
         createOptions.HostConfig.PortBindings['3001/tcp'] = [{ HostPort: apiPort.toString() }];
+    } else {
+        apiPort = 8000;
     }
 
     try {
@@ -84,14 +96,31 @@ box.start = async (tag, pull, dir, nodeEnv, uiPort, apiPort, gatewayPort, adminP
         }
         const boxContainer = await docker.createContainer(createOptions);
         await boxContainer.start();
-        console.log('wicked-in-a-box is running. Point your browser to:');
-        console.log(`  --> http://localhost:${uiPort}`);
+
+        const uiUrl = `http://localhost:${uiPort}`;
+
+        console.log('wicked-in-a-box has started. When the startup has finished, point your browser to:');
+        console.log();
+        console.log(`  ${uiUrl}`);
         console.log();
         console.log('You can follow the logs with the following command:');
+        console.log();
         console.log(`  docker logs -f ${BOX_CONTAINER_NAME}`);
         console.log();
         console.log('Stop the wicked in a box container with the following command:');
+        console.log();
         console.log(`  wicked box stop`);
+        console.log();
+
+        if (wait) {
+            await environmentHasStarted(apiPort);
+            if (open) {
+                console.log(`Opening ${uiUrl}...`);
+                opn(uiUrl);
+            }
+        } else {
+            console.log('Not waiting for environment to start. Allow up to 20 seconds until the environment is ready.');
+        }
         return callback(null);
     } catch (err) {
         console.error(err.message);
@@ -136,5 +165,35 @@ box.getBoxContainer = async () => {
 box.getBoxImageName = () => {
     return BOX_IMAGE_NAME;
 };
+
+async function environmentHasStarted(apiPort) {
+    process.stdout.write('Waiting for environment to start');
+    let started = false;
+    const startTime = Date.now();
+    while (!started && (Date.now() - startTime < 60000)) {
+        process.stdout.write('.');
+        await implUtils.delay(1000);
+        try {
+            const pingRes = await axios({
+                method: 'GET',
+                url: `http://localhost:${apiPort}/ping-portal`,
+                timeout: 500
+            });
+            if (200 === pingRes.status) {
+                started = true;
+            }
+        } catch (err) {
+            // Ignore, this is somewhat expected
+        }
+    }
+    console.log('');
+
+    if (!started) {
+        console.error('*** Start of wicked box timed out!');
+        process.exit(1);
+    }
+    console.log('wicked-in-a-box successfully started.');
+    return;
+}
 
 module.exports = box;
