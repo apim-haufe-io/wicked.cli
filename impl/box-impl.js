@@ -85,8 +85,6 @@ box.start = async (tag, pull, dir, nodeEnv, uiPort, apiPort, gatewayPort, adminP
     if (apiPort) {
         console.log(`Exposing the wicked API on http://localhost:${apiPort}`);
         createOptions.HostConfig.PortBindings['3001/tcp'] = [{ HostPort: apiPort.toString() }];
-    } else {
-        apiPort = 8000;
     }
 
     try {
@@ -113,7 +111,7 @@ box.start = async (tag, pull, dir, nodeEnv, uiPort, apiPort, gatewayPort, adminP
         console.log();
 
         if (wait) {
-            await environmentHasStarted(apiPort);
+            await environmentHasStarted(gatewayPort);
             if (open) {
                 console.log(`Opening ${uiUrl}...`);
                 opn(uiUrl);
@@ -166,7 +164,9 @@ box.getBoxImageName = () => {
     return BOX_IMAGE_NAME;
 };
 
-async function environmentHasStarted(apiPort) {
+async function environmentHasStarted(gatewayPort) {
+    const pingEndpoint = `http://localhost:${gatewayPort}/ping-portal`;
+    console.log(`Probing ping endpoint ${pingEndpoint}`);
     process.stdout.write('Waiting for environment to start');
     let started = false;
     const startTime = Date.now();
@@ -176,7 +176,7 @@ async function environmentHasStarted(apiPort) {
         try {
             const pingRes = await axios({
                 method: 'GET',
-                url: `http://localhost:${apiPort}/ping-portal`,
+                url: pingEndpoint,
                 timeout: 500
             });
             if (200 === pingRes.status) {
