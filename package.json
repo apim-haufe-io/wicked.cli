@@ -1,6 +1,6 @@
 {
   "name": "wicked-cli",
-  "version": "1.0.0-rc.2-beta.3",
+  "version": "1.0.0-rc.2",
   "description": "wicked.haufe.io Command Line Tool",
   "main": "commands/wicked.js",
   "scripts": {
