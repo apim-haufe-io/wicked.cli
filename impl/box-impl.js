@@ -14,7 +14,22 @@ const box = {};
 const BOX_CONTAINER_NAME = 'wicked-box';
 const BOX_IMAGE_NAME = 'haufelexware/wicked.box';
 
-box.start = async (tag, pull, dir, nodeEnv, uiPort, apiPort, gatewayPort, adminPort, logLevel, defaultDockerHost, wait, open, callback) => {
+box.start = async (
+    tag,
+    pull,
+    dir,
+    nodeEnv,
+    uiPort,
+    apiPort,
+    gatewayPort,
+    adminPort,
+    logLevel,
+    defaultDockerHost,
+    wait,
+    open,
+    allowAnyRedirectUri,
+    callback
+) => {
     const currentDir = process.cwd();
     let configDir = dir;
     if (!path.isAbsolute(configDir))
@@ -85,6 +100,10 @@ box.start = async (tag, pull, dir, nodeEnv, uiPort, apiPort, gatewayPort, adminP
     if (apiPort) {
         console.log(`Exposing the wicked API on http://localhost:${apiPort}`);
         createOptions.HostConfig.PortBindings['3001/tcp'] = [{ HostPort: apiPort.toString() }];
+    }
+    if (allowAnyRedirectUri) {
+        // https://github.com/Haufe-Lexware/wicked.haufe.io/issues/196
+        createOptions.Env.push('ALLOW_ANY_REDIRECT_URI=true');
     }
 
     try {

@@ -21,16 +21,32 @@ program
     .option('--no-pull', 'do not attempt to pull the image')
     .option('--no-wait', 'do not wait (up 60 seconds) until environment has started')
     .option('--no-open', 'do not open the browser with the portal after it has finished; implied by --no-wait')
+    .option('--allow-any-redirect-uri', 'allow any (syntactically valid) redirect URI (sets ALLOW_ANY_REDIRECT_URI)')
     .action((configDir) => {
         didAction = true;
         // console.log('box start!');
-        box.start(program.tag, program.pull, configDir, program.nodeEnv, program.uiPort, program.apiPort, program.gatewayPort, program.adminPort, program.logLevel, program.dockerHost, program.wait, program.open, (err) => {
-            if (err) {
-                console.error(err);
-                process.exit(1);
+        box.start(
+            program.tag,
+            program.pull,
+            configDir,
+            program.nodeEnv,
+            program.uiPort,
+            program.apiPort,
+            program.gatewayPort,
+            program.adminPort,
+            program.logLevel,
+            program.dockerHost,
+            program.wait,
+            program.open,
+            program.allowAnyRedirectUri,
+            (err) => {
+                if (err) {
+                    console.error(err);
+                    process.exit(1);
+                }
+                process.exit(0);
             }
-            process.exit(0);
-        });
+        );
     })
     .parse(process.argv);
 
