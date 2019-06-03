@@ -86,10 +86,12 @@ box.start = async (
                 '3000/tcp': [{ 'HostPort': uiPort.toString() }],
                 '8000/tcp': [{ 'HostPort': gatewayPort.toString() }]
             },
-            AutoRemove: true,
             Binds: [
                 `${configDir}:/var/portal-api`
-            ]
+            ],
+            RestartConfig: {
+                Name: 'unless-stopped'
+            }
         }
     };
 
@@ -156,6 +158,7 @@ box.stop = async (callback) => {
     try {
         const boxContainer = docker.getContainer(boxContainerInfo.Id);
         await boxContainer.stop();
+        await boxContainer.remove();
         console.log(`Container ${BOX_CONTAINER_NAME} was stopped.`);
         return callback(null);
     } catch (err) {
