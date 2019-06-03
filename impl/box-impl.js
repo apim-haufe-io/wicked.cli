@@ -89,7 +89,7 @@ box.start = async (
             Binds: [
                 `${configDir}:/var/portal-api`
             ],
-            RestartConfig: {
+            RestartPolicy: {
                 Name: 'unless-stopped'
             }
         }
