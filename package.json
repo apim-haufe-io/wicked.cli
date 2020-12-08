@@ -4,7 +4,9 @@
   "description": "wicked.haufe.io Command Line Tool",
   "main": "commands/wicked.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "snyk-protect": "snyk protect",
+    "prepare": "npm run snyk-protect"
   },
   "repository": {
     "type": "git",
@@ -28,6 +30,8 @@
     "axios": "0.19.0",
     "commander": "2.19.0",
     "dockerode": "2.5.8",
-    "opn": "5.4.0"
-  }
+    "opn": "5.4.0",
+    "snyk": "^1.161.1"
+  },
+  "snyk": true
 }
