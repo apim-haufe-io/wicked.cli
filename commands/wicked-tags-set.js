@@ -12,7 +12,8 @@ program
     .arguments('<tag>', 'the tag to set as the current tag')
     .action((tag) => {
         didAction = true;
-        tags.setCurrentTag(tag, program.force, (err) => {
+        const options = program.opts();
+        tags.setCurrentTag(tag, options.force, (err) => {
             if (err) {
                 console.error(err);
                 process.exit(1);

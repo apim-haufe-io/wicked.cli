@@ -22,23 +22,25 @@ program
     .option('--no-wait', 'do not wait (up 60 seconds) until environment has started')
     .option('--no-open', 'do not open the browser with the portal after it has finished; implied by --no-wait')
     .option('--allow-any-redirect-uri', 'allow any (syntactically valid) redirect URI (sets ALLOW_ANY_REDIRECT_URI)')
+    .option('--platform <platform>', 'specify the docker platform to use', process.arch == 'arm64' ? 'linux/arm64' : 'linux/amd64')
     .action((configDir) => {
         didAction = true;
-        // console.log('box start!');
+        const options = program.opts();
         box.start(
-            program.tag,
-            program.pull,
+            options.tag,
+            options.pull,
             configDir,
-            program.nodeEnv,
-            program.uiPort,
-            program.apiPort,
-            program.gatewayPort,
-            program.adminPort,
-            program.logLevel,
-            program.dockerHost,
-            program.wait,
-            program.open,
-            program.allowAnyRedirectUri,
+            options.nodeEnv,
+            options.uiPort,
+            options.apiPort,
+            options.gatewayPort,
+            options.adminPort,
+            options.logLevel,
+            options.dockerHost,
+            options.wait,
+            options.open,
+            options.platform,
+            options.allowAnyRedirectUri,
             (err) => {
                 if (err) {
                     console.error(err);

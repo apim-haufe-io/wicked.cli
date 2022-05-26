@@ -3,7 +3,7 @@
 const Docker = require('dockerode');
 const docker = new Docker();
 const axios = require('axios');
-const opn = require('opn');
+const opn = require('open');
 const path = require('path');
 
 const postgres = require('./postgres-impl');
@@ -27,6 +27,7 @@ box.start = async (
     defaultDockerHost,
     wait,
     open,
+    platform,
     allowAnyRedirectUri,
     callback
 ) => {
@@ -92,7 +93,9 @@ box.start = async (
             RestartPolicy: {
                 Name: 'unless-stopped'
             }
-        }
+        },
+        Platform: platform,
+        platform: platform
     };
 
     if (adminPort) {
@@ -111,7 +114,10 @@ box.start = async (
     try {
         if (pull) {
             console.log(`Pulling '${imageName}'...`);
-            await implUtils.pull(createOptions.Image);
+            await implUtils.pull(createOptions.Image, {
+                Platform: platform,
+                platform: platform
+            });
         }
         const boxContainer = await docker.createContainer(createOptions);
         await boxContainer.start();

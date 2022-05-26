@@ -20,9 +20,9 @@ implUtils.getContainerByName = async (name) => {
     return null;
 };
 
-implUtils.pull = async (imageName) => {
+implUtils.pull = async (imageName, options) => {
     return new Promise(function (resolve, reject) {
-        docker.pull(imageName, {}, function (err, stream) {
+        docker.pull(imageName, options, function (err, stream) {
             if (err)
                 return reject(err);
             docker.modem.followProgress(stream, onFinished, onProgress);

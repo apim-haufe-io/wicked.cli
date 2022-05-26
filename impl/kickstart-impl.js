@@ -13,7 +13,7 @@ const docker = new Docker();
 
 const KICKSTARTER_CONTAINER = 'wicked-kickstarter';
 
-kickstart.run = async (tag, pull, dir, newFlag, logLevel, callback) => {
+kickstart.run = async (tag, pull, dir, newFlag, logLevel, platform, callback) => {
     const currentDir = process.cwd();
     let configDir = dir;
     if (!path.isAbsolute(configDir))
@@ -34,7 +34,9 @@ kickstart.run = async (tag, pull, dir, newFlag, logLevel, callback) => {
         },
         Env: [
             `LOG_LEVEL=${logLevel}`
-        ]
+        ],
+        Platform: platform,
+        platform: platform
     };
 
     const cmd = [];
@@ -60,7 +62,10 @@ kickstart.run = async (tag, pull, dir, newFlag, logLevel, callback) => {
     if (pull) {
         console.log(`Pulling '${kickstarterImage}'...`);
         try {
-            await implUtils.pull(kickstarterImage);
+            await implUtils.pull(kickstarterImage, {
+                platform: platform,
+                Platform: platform
+            });
         } catch (err) {
             console.error(err.message);
             console.error('*** docker pull failed. Are you using the wrong --tag, or do you need to supply a --tag?');

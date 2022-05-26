@@ -10,7 +10,7 @@ const postgres = {};
 
 const PG_CONTAINER_NAME = 'wicked-postgres';
 
-postgres.start = async (tag, pull, pgPort, dataDir, callback) => {
+postgres.start = async (tag, pull, pgPort, dataDir, platform, callback) => {
     const pgContainer = await postgres.getPgContainer();
 
     let volumeDir;
@@ -39,7 +39,9 @@ postgres.start = async (tag, pull, pgPort, dataDir, callback) => {
         HostConfig: {
             PortBindings: { '5432/tcp': [{ 'HostPort': pgPort.toString() }] },
             AutoRemove: true,
-        }
+        },
+        Platform: platform,
+        platform: platform
     };
     const portString = `${pgPort}/tcp`;
     createOptions.ExposedPorts[portString] = {};
@@ -51,8 +53,11 @@ postgres.start = async (tag, pull, pgPort, dataDir, callback) => {
 
     try {
         if (pull) {
-            console.log(`Pulling ${imageName}...`);
-            await implUtils.pull(imageName);
+            console.log(`Pulling ${imageName} (${platform})...`);
+            await implUtils.pull(imageName, {
+                Platform: platform,
+                platform: platform
+            });
         }
         const container = await docker.createContainer(createOptions);
         await container.start({});
